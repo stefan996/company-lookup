@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  company-lookup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/company_lookup
+      - SPRING_DATASOURCE_USERNAME=test_user
+      - SPRING_DATASOURCE_PASSWORD=test_password
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=company_lookup
+    ports:
+      - "5432:5432"
+    volumes:
+      # persist PostgreSQL database data between container restarts
+      - ./postgres-data:/var/lib/postgresql/data
+      # automatically execute the init.sql script on the first container startup
+      - ./src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql
